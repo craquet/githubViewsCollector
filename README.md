@@ -18,14 +18,14 @@ The collector runs as a standalone service. It fetches data from GitHub on a con
 
 The collector fetches four types of traffic data per repository:
 
-| GitHub API Endpoint | Data |
-|---|---|
-| `GET /repos/{owner}/{repo}/traffic/views?per=day` | Daily page views (total + unique) |
-| `GET /repos/{owner}/{repo}/traffic/views?per=week` | Weekly page views (total + unique) |
-| `GET /repos/{owner}/{repo}/traffic/clones?per=day` | Daily clones (total + unique) |
-| `GET /repos/{owner}/{repo}/traffic/clones?per=week` | Weekly clones (total + unique) |
-| `GET /repos/{owner}/{repo}/traffic/popular/referrers` | Top 10 referral sources |
-| `GET /repos/{owner}/{repo}/traffic/popular/paths` | Top 10 popular content paths |
+| GitHub API Endpoint                                   | Data                               |
+|-------------------------------------------------------|------------------------------------|
+| `GET /repos/{owner}/{repo}/traffic/views?per=day`     | Daily page views (total + unique)  |
+| `GET /repos/{owner}/{repo}/traffic/views?per=week`    | Weekly page views (total + unique) |
+| `GET /repos/{owner}/{repo}/traffic/clones?per=day`    | Daily clones (total + unique)      |
+| `GET /repos/{owner}/{repo}/traffic/clones?per=week`   | Weekly clones (total + unique)     |
+| `GET /repos/{owner}/{repo}/traffic/popular/referrers` | Top 10 referral sources            |
+| `GET /repos/{owner}/{repo}/traffic/popular/paths`     | Top 10 popular content paths       |
 
 This results in **6 API calls per repository** per collection run.
 
@@ -33,11 +33,11 @@ This results in **6 API calls per repository** per collection run.
 
 GitHub's weekly traffic endpoint returns 3 entries covering 14 days:
 
-| Entry | Content | Example |
-|---|---|---|
-| Entry 0 | Partial trailing days of the oldest week | Mar 2 (covers Mar 4-8, a partial Mon-Sun) |
-| Entry 1 | The last **fully completed** Mon-Sun week | Mar 9 (covers Mar 9-15, a full week) |
-| Entry 2 | Partial current week (Mon through today) | Mar 16 (covers Mar 16-17, still in progress) |
+| Entry          | Content                                   | Example                                      |
+|----------------|-------------------------------------------|----------------------------------------------|
+| Entry 0        | Partial trailing days of the oldest week  | Mar 2 (covers Mar 4-8, a partial Mon-Sun)    |
+| Entry 1        | The last **fully completed** Mon-Sun week | Mar 9 (covers Mar 9-15, a full week)         |
+| Entry 2        | Partial current week (Mon through today)  | Mar 16 (covers Mar 16-17, still in progress) |
 
 The `uniques` count within each entry is **deduplicated by GitHub within that period** -- a visitor who comes on Tuesday and Thursday of the same week counts as 1 unique. This deduplication happens server-side and cannot be reconstructed from daily data.
 
@@ -49,42 +49,42 @@ Over time, Prometheus accumulates a history of full-week values as each week com
 
 ### Views
 
-| Metric | Labels | Description |
-|---|---|---|
-| `github_repo_views_total` | `owner`, `repo` | Rolling 14-day total page views |
-| `github_repo_views_unique` | `owner`, `repo` | Rolling 14-day unique visitors |
-| `github_repo_views_weekly_total` | `owner`, `repo`, `week` | Total views for the last full week (Mon-Sun) |
+| Metric                            | Labels                  | Description                                      |
+|-----------------------------------|-------------------------|--------------------------------------------------|
+| `github_repo_views_total`         | `owner`, `repo`         | Rolling 14-day total page views                  |
+| `github_repo_views_unique`        | `owner`, `repo`         | Rolling 14-day unique visitors                   |
+| `github_repo_views_weekly_total`  | `owner`, `repo`, `week` | Total views for the last full week (Mon-Sun)     |
 | `github_repo_views_weekly_unique` | `owner`, `repo`, `week` | Unique visitors for the last full week (Mon-Sun) |
-| `github_repo_views_daily_total` | `owner`, `repo`, `date` | Total views per day |
-| `github_repo_views_daily_unique` | `owner`, `repo`, `date` | Unique visitors per day |
+| `github_repo_views_daily_total`   | `owner`, `repo`, `date` | Total views per day                              |
+| `github_repo_views_daily_unique`  | `owner`, `repo`, `date` | Unique visitors per day                          |
 
 ### Clones
 
-| Metric | Labels | Description |
-|---|---|---|
-| `github_repo_clones_total` | `owner`, `repo` | Rolling 14-day total clones |
-| `github_repo_clones_unique` | `owner`, `repo` | Rolling 14-day unique cloners |
-| `github_repo_clones_weekly_total` | `owner`, `repo`, `week` | Total clones for the last full week (Mon-Sun) |
+| Metric                             | Labels                  | Description                                     |
+|------------------------------------|-------------------------|-------------------------------------------------|
+| `github_repo_clones_total`         | `owner`, `repo`         | Rolling 14-day total clones                     |
+| `github_repo_clones_unique`        | `owner`, `repo`         | Rolling 14-day unique cloners                   |
+| `github_repo_clones_weekly_total`  | `owner`, `repo`, `week` | Total clones for the last full week (Mon-Sun)   |
 | `github_repo_clones_weekly_unique` | `owner`, `repo`, `week` | Unique cloners for the last full week (Mon-Sun) |
-| `github_repo_clones_daily_total` | `owner`, `repo`, `date` | Total clones per day |
-| `github_repo_clones_daily_unique` | `owner`, `repo`, `date` | Unique cloners per day |
+| `github_repo_clones_daily_total`   | `owner`, `repo`, `date` | Total clones per day                            |
+| `github_repo_clones_daily_unique`  | `owner`, `repo`, `date` | Unique cloners per day                          |
 
 ### Referrers and Popular Paths
 
-| Metric | Labels | Description |
-|---|---|---|
-| `github_repo_referrer_views_total` | `owner`, `repo`, `referrer` | Total views from a referral source (14-day) |
-| `github_repo_referrer_views_unique` | `owner`, `repo`, `referrer` | Unique visitors from a referral source (14-day) |
-| `github_repo_popular_path_views_total` | `owner`, `repo`, `path` | Total views for a content path (14-day) |
-| `github_repo_popular_path_views_unique` | `owner`, `repo`, `path` | Unique visitors for a content path (14-day) |
+| Metric                                  | Labels                      | Description                                     |
+|-----------------------------------------|-----------------------------|-------------------------------------------------|
+| `github_repo_referrer_views_total`      | `owner`, `repo`, `referrer` | Total views from a referral source (14-day)     |
+| `github_repo_referrer_views_unique`     | `owner`, `repo`, `referrer` | Unique visitors from a referral source (14-day) |
+| `github_repo_popular_path_views_total`  | `owner`, `repo`, `path`     | Total views for a content path (14-day)         |
+| `github_repo_popular_path_views_unique` | `owner`, `repo`, `path`     | Unique visitors for a content path (14-day)     |
 
 ### Collector Health
 
-| Metric | Labels | Description |
-|---|---|---|
-| `github_views_collector_last_run_timestamp_seconds` | -- | Unix timestamp of the last collection run |
-| `github_views_collector_duration_seconds` | -- | Duration of the last collection run |
-| `github_views_collector_errors_total` | -- | Number of per-repo errors in the last collection run |
+| Metric                                              | Labels | Description                                          |
+|-----------------------------------------------------|--------|------------------------------------------------------|
+| `github_views_collector_last_run_timestamp_seconds` | --     | Unix timestamp of the last collection run            |
+| `github_views_collector_duration_seconds`           | --     | Duration of the last collection run                  |
+| `github_views_collector_errors_total`               | --     | Number of per-repo errors in the last collection run |
 
 Default Node.js process metrics (memory, CPU, event loop) are also exposed.
 
@@ -122,13 +122,13 @@ curl http://localhost:9091/health
 
 All configuration is via environment variables. A `.env` file is supported for local development.
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `GITHUB_TOKEN` | Yes | -- | GitHub personal access token with `repo` scope |
-| `GITHUB_REPOS` | Yes | -- | Comma-separated list of repositories (`owner/repo`) |
-| `CRON_SCHEDULE` | No | `0 */6 * * *` | Cron expression for the collection schedule |
-| `METRICS_PORT` | No | `9091` | Port for the HTTP `/metrics` endpoint |
-| `GITHUB_API_URL` | No | `https://api.github.com` | GitHub API base URL (for GitHub Enterprise) |
+| Variable         | Required | Default                  | Description                                         |
+|------------------|----------|--------------------------|-----------------------------------------------------|
+| `GITHUB_TOKEN`   | Yes      | --                       | GitHub personal access token with `repo` scope      |
+| `GITHUB_REPOS`   | Yes      | --                       | Comma-separated list of repositories (`owner/repo`) |
+| `CRON_SCHEDULE`  | No       | `0 */6 * * *`            | Cron expression for the collection schedule         |
+| `METRICS_PORT`   | No       | `9091`                   | Port for the HTTP `/metrics` endpoint               |
+| `GITHUB_API_URL` | No       | `https://api.github.com` | GitHub API base URL (for GitHub Enterprise)         |
 
 ### Example `.env`
 
@@ -141,12 +141,12 @@ METRICS_PORT=9091
 
 ### Cron Schedule Examples
 
-| Expression | Frequency |
-|---|---|
-| `0 */6 * * *` | Every 6 hours (default) |
-| `0 */3 * * *` | Every 3 hours |
-| `0 0 * * *` | Once daily at midnight |
-| `*/30 * * * *` | Every 30 minutes |
+| Expression     | Frequency               |
+|----------------|-------------------------|
+| `0 */6 * * *`  | Every 6 hours (default) |
+| `0 */3 * * *`  | Every 3 hours           |
+| `0 0 * * *`    | Once daily at midnight  |
+| `*/30 * * * *` | Every 30 minutes        |
 
 The schedule uses the container/process timezone. GitHub traffic timestamps are always UTC.
 
@@ -245,11 +245,11 @@ github_views_collector_errors_total > 0
 With authenticated requests, GitHub allows 5,000 requests per hour. Each collection run uses 6 API calls per repository, so:
 
 | Repos | Calls per Run | Runs per Hour (every 6h) | Hourly Usage |
-|---|---|---|---|
-| 1 | 6 | ~0.17 | ~1 |
-| 10 | 60 | ~0.17 | ~10 |
-| 50 | 300 | ~0.17 | ~50 |
-| 100 | 600 | ~0.17 | ~100 |
+|-------|---------------|--------------------------|--------------|
+| 1     | 6             | ~0.17                    | ~1           |
+| 10    | 60            | ~0.17                    | ~10          |
+| 50    | 300           | ~0.17                    | ~50          |
+| 100   | 600           | ~0.17                    | ~100         |
 
 The collector logs a warning when the remaining rate limit drops below 100 requests and provides detailed error messages on rate limit exhaustion.
 
