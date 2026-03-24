@@ -136,12 +136,15 @@ Optional: `CRON_SCHEDULE` (default `"0 */6 * * *"`), `METRICS_PORT` (default
 
 ## Prometheus Metrics
 
-All metrics are Gauges registered on a dedicated `Registry` instance (not the
-global default). Default Node.js process metrics are also collected. The HTTP
+Most metrics are prom-client Gauges registered on a dedicated `Registry` instance
+(not the global default). Daily metrics use a custom `TimestampedGauge` class
+that attaches a Prometheus-format timestamp to each sample instead of encoding
+the date as a label. Default Node.js process metrics are also collected. The HTTP
 server exposes two endpoints: `GET /metrics` and `GET /health`.
 
 When adding new metrics:
 1. Define the Gauge in `metrics.ts` with `registers: [registry]`
+   - For timestamped metrics, use `TimestampedGauge` and add it to `timestampedGauges`
 2. Reset it in `updateGauges()` in `collector.ts` before setting values
 3. Set values in the same function after the reset block
 4. Update the metrics table in `README.md`

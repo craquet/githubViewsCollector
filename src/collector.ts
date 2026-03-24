@@ -3,10 +3,31 @@ import { GitHubClient, RepoTrafficData, TrafficEntry } from "./github";
 import * as metrics from "./metrics";
 
 /**
+ * Convert an ISO 8601 timestamp string to milliseconds since epoch.
+ */
+function toEpochMs(timestamp: string): number {
+  return new Date(timestamp).getTime();
+}
+
+/**
  * Format a timestamp string (ISO 8601) to a YYYY-MM-DD date string.
  */
 function toDateString(timestamp: string): string {
   return timestamp.slice(0, 10);
+}
+
+/**
+ * Return the most recent entry from a list of traffic entries.
+ */
+function getLatestEntry(entries: TrafficEntry[] | undefined): TrafficEntry | null {
+  if (!entries || entries.length === 0) {
+    return null;
+  }
+  return entries.reduce((latest, entry) =>
+    new Date(entry.timestamp).getTime() > new Date(latest.timestamp).getTime()
+      ? entry
+      : latest
+  );
 }
 
 /**
@@ -82,13 +103,12 @@ function updateGauges(allData: RepoTrafficData[]): void {
       metrics.viewsWeeklyUnique.set({ owner, repo, week }, fullViewsWeek.uniques);
     }
 
-    // --- Views: daily ---
-    if (data.viewsDaily.views) {
-      for (const entry of data.viewsDaily.views) {
-        const date = toDateString(entry.timestamp);
-        metrics.viewsDailyTotal.set({ owner, repo, date }, entry.count);
-        metrics.viewsDailyUnique.set({ owner, repo, date }, entry.uniques);
-      }
+    // --- Views: latest daily entry (timestamped) ---
+    const latestViewDay = getLatestEntry(data.viewsDaily.views);
+    if (latestViewDay) {
+      const ts = toEpochMs(latestViewDay.timestamp);
+      metrics.viewsDailyTotal.set({ owner, repo }, latestViewDay.count, ts);
+      metrics.viewsDailyUnique.set({ owner, repo }, latestViewDay.uniques, ts);
     }
 
     // --- Clones: 14-day rolling totals ---
@@ -103,13 +123,12 @@ function updateGauges(allData: RepoTrafficData[]): void {
       metrics.clonesWeeklyUnique.set({ owner, repo, week }, fullClonesWeek.uniques);
     }
 
-    // --- Clones: daily ---
-    if (data.clonesDaily.clones) {
-      for (const entry of data.clonesDaily.clones) {
-        const date = toDateString(entry.timestamp);
-        metrics.clonesDailyTotal.set({ owner, repo, date }, entry.count);
-        metrics.clonesDailyUnique.set({ owner, repo, date }, entry.uniques);
-      }
+    // --- Clones: latest daily entry (timestamped) ---
+    const latestCloneDay = getLatestEntry(data.clonesDaily.clones);
+    if (latestCloneDay) {
+      const ts = toEpochMs(latestCloneDay.timestamp);
+      metrics.clonesDailyTotal.set({ owner, repo }, latestCloneDay.count, ts);
+      metrics.clonesDailyUnique.set({ owner, repo }, latestCloneDay.uniques, ts);
     }
 
     // --- Referrers ---

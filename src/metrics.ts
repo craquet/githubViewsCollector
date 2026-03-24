@@ -7,6 +7,81 @@ export const registry = new Registry();
 // Collect default Node.js metrics (memory, CPU, event loop, etc.)
 collectDefaultMetrics({ register: registry });
 
+// --- Timestamped gauge ---
+
+interface TimestampedGaugeConfig {
+  name: string;
+  help: string;
+  labelNames: readonly string[];
+}
+
+interface TimestampedSample {
+  labels: Record<string, string>;
+  value: number;
+  timestampMs: number;
+}
+
+/**
+ * A gauge that attaches a Prometheus-format timestamp to each sample.
+ *
+ * Standard prom-client gauges do not support per-sample timestamps. This class
+ * stores samples independently and serializes them in the Prometheus exposition
+ * format with the optional timestamp suffix: `metric{labels} value timestamp_ms`.
+ */
+export class TimestampedGauge {
+  private readonly name: string;
+  private readonly help: string;
+  private readonly labelNames: readonly string[];
+  private samples: TimestampedSample[] = [];
+
+  constructor(config: TimestampedGaugeConfig) {
+    this.name = config.name;
+    this.help = config.help;
+    this.labelNames = config.labelNames;
+  }
+
+  /** Remove all stored samples. */
+  reset(): void {
+    this.samples = [];
+  }
+
+  /** Record a value with an explicit timestamp (milliseconds since epoch). */
+  set(labels: Record<string, string>, value: number, timestampMs: number): void {
+    this.samples.push({ labels, value, timestampMs });
+  }
+
+  /** Serialize all samples in Prometheus exposition format. */
+  serialize(): string {
+    if (this.samples.length === 0) {
+      return "";
+    }
+
+    const lines: string[] = [
+      `# HELP ${this.name} ${this.help}`,
+      `# TYPE ${this.name} gauge`,
+    ];
+
+    for (const sample of this.samples) {
+      const labelParts = this.labelNames
+        .filter((l) => sample.labels[l] !== undefined)
+        .map((l) => `${l}="${escapeLabelValue(String(sample.labels[l]))}"`)
+        .join(",");
+      const labelsStr = labelParts.length > 0 ? `{${labelParts}}` : "";
+      lines.push(`${this.name}${labelsStr} ${sample.value} ${sample.timestampMs}`);
+    }
+
+    return lines.join("\n");
+  }
+}
+
+/** Escape special characters in a Prometheus label value. */
+function escapeLabelValue(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n");
+}
+
+/** All timestamped gauges, collected for serialization in the /metrics endpoint. */
+export const timestampedGauges: TimestampedGauge[] = [];
+
 // --- Views ---
 
 export const viewsTotal = new Gauge({
@@ -37,19 +112,19 @@ export const viewsWeeklyUnique = new Gauge({
   registers: [registry],
 });
 
-export const viewsDailyTotal = new Gauge({
+export const viewsDailyTotal = new TimestampedGauge({
   name: "github_repo_views_daily_total",
-  help: "Total repository views per day",
-  labelNames: ["owner", "repo", "date"] as const,
-  registers: [registry],
+  help: "Total repository views for the most recent day",
+  labelNames: ["owner", "repo"] as const,
 });
+timestampedGauges.push(viewsDailyTotal);
 
-export const viewsDailyUnique = new Gauge({
+export const viewsDailyUnique = new TimestampedGauge({
   name: "github_repo_views_daily_unique",
-  help: "Unique repository visitors per day",
-  labelNames: ["owner", "repo", "date"] as const,
-  registers: [registry],
+  help: "Unique repository visitors for the most recent day",
+  labelNames: ["owner", "repo"] as const,
 });
+timestampedGauges.push(viewsDailyUnique);
 
 // --- Clones ---
 
@@ -81,19 +156,19 @@ export const clonesWeeklyUnique = new Gauge({
   registers: [registry],
 });
 
-export const clonesDailyTotal = new Gauge({
+export const clonesDailyTotal = new TimestampedGauge({
   name: "github_repo_clones_daily_total",
-  help: "Total repository clones per day",
-  labelNames: ["owner", "repo", "date"] as const,
-  registers: [registry],
+  help: "Total repository clones for the most recent day",
+  labelNames: ["owner", "repo"] as const,
 });
+timestampedGauges.push(clonesDailyTotal);
 
-export const clonesDailyUnique = new Gauge({
+export const clonesDailyUnique = new TimestampedGauge({
   name: "github_repo_clones_daily_unique",
-  help: "Unique repository cloners per day",
-  labelNames: ["owner", "repo", "date"] as const,
-  registers: [registry],
+  help: "Unique repository cloners for the most recent day",
+  labelNames: ["owner", "repo"] as const,
 });
+timestampedGauges.push(clonesDailyUnique);
 
 // --- Referrers ---
 
@@ -139,7 +214,14 @@ export function startMetricsServer(port: number): http.Server {
   server = http.createServer(async (req, res) => {
     if (req.url === "/metrics" && req.method === "GET") {
       try {
-        const metrics = await registry.metrics();
+        const registryOutput = await registry.metrics();
+        const timestampedOutput = timestampedGauges
+          .map((g) => g.serialize())
+          .filter((s) => s.length > 0)
+          .join("\n");
+        const metrics = timestampedOutput
+          ? `${registryOutput}\n${timestampedOutput}\n`
+          : registryOutput;
         res.writeHead(200, { "Content-Type": registry.contentType });
         res.end(metrics);
       } catch (err) {

@@ -54,8 +54,8 @@ Over time, Prometheus accumulates a history of full-week values as each week com
 | `github_repo_views_unique`        | `owner`, `repo`         | Rolling 14-day unique visitors                   |
 | `github_repo_views_weekly_total`  | `owner`, `repo`, `week` | Total views for the last full week (Mon-Sun)     |
 | `github_repo_views_weekly_unique` | `owner`, `repo`, `week` | Unique visitors for the last full week (Mon-Sun) |
-| `github_repo_views_daily_total`   | `owner`, `repo`, `date` | Total views per day                              |
-| `github_repo_views_daily_unique`  | `owner`, `repo`, `date` | Unique visitors per day                          |
+| `github_repo_views_daily_total`   | `owner`, `repo`         | Total views for the most recent day (timestamped)   |
+| `github_repo_views_daily_unique`  | `owner`, `repo`         | Unique visitors for the most recent day (timestamped) |
 
 ### Clones
 
@@ -65,8 +65,8 @@ Over time, Prometheus accumulates a history of full-week values as each week com
 | `github_repo_clones_unique`        | `owner`, `repo`         | Rolling 14-day unique cloners                   |
 | `github_repo_clones_weekly_total`  | `owner`, `repo`, `week` | Total clones for the last full week (Mon-Sun)   |
 | `github_repo_clones_weekly_unique` | `owner`, `repo`, `week` | Unique cloners for the last full week (Mon-Sun) |
-| `github_repo_clones_daily_total`   | `owner`, `repo`, `date` | Total clones per day                            |
-| `github_repo_clones_daily_unique`  | `owner`, `repo`, `date` | Unique cloners per day                          |
+| `github_repo_clones_daily_total`   | `owner`, `repo`         | Total clones for the most recent day (timestamped)  |
+| `github_repo_clones_daily_unique`  | `owner`, `repo`         | Unique cloners for the most recent day (timestamped) |
 
 ### Referrers
 
