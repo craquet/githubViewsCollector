@@ -111,22 +111,6 @@ export const referrerViewsUnique = new Gauge({
   registers: [registry],
 });
 
-// --- Popular paths ---
-
-export const popularPathViewsTotal = new Gauge({
-  name: "github_repo_popular_path_views_total",
-  help: "Total views for a popular path over the last 14 days",
-  labelNames: ["owner", "repo", "path"] as const,
-  registers: [registry],
-});
-
-export const popularPathViewsUnique = new Gauge({
-  name: "github_repo_popular_path_views_unique",
-  help: "Unique visitors for a popular path over the last 14 days",
-  labelNames: ["owner", "repo", "path"] as const,
-  registers: [registry],
-});
-
 // --- Collection metadata ---
 
 export const lastCollectionTimestamp = new Gauge({

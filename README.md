@@ -25,9 +25,8 @@ The collector fetches four types of traffic data per repository:
 | `GET /repos/{owner}/{repo}/traffic/clones?per=day`    | Daily clones (total + unique)      |
 | `GET /repos/{owner}/{repo}/traffic/clones?per=week`   | Weekly clones (total + unique)     |
 | `GET /repos/{owner}/{repo}/traffic/popular/referrers` | Top 10 referral sources            |
-| `GET /repos/{owner}/{repo}/traffic/popular/paths`     | Top 10 popular content paths       |
 
-This results in **6 API calls per repository** per collection run.
+This results in **5 API calls per repository** per collection run.
 
 ## How Weekly Unique Visitors Work
 
@@ -69,14 +68,12 @@ Over time, Prometheus accumulates a history of full-week values as each week com
 | `github_repo_clones_daily_total`   | `owner`, `repo`, `date` | Total clones per day                            |
 | `github_repo_clones_daily_unique`  | `owner`, `repo`, `date` | Unique cloners per day                          |
 
-### Referrers and Popular Paths
+### Referrers
 
 | Metric                                  | Labels                      | Description                                     |
 |-----------------------------------------|-----------------------------|-------------------------------------------------|
 | `github_repo_referrer_views_total`      | `owner`, `repo`, `referrer` | Total views from a referral source (14-day)     |
 | `github_repo_referrer_views_unique`     | `owner`, `repo`, `referrer` | Unique visitors from a referral source (14-day) |
-| `github_repo_popular_path_views_total`  | `owner`, `repo`, `path`     | Total views for a content path (14-day)         |
-| `github_repo_popular_path_views_unique` | `owner`, `repo`, `path`     | Unique visitors for a content path (14-day)     |
 
 ### Collector Health
 
@@ -242,14 +239,14 @@ github_views_collector_errors_total > 0
 
 ## GitHub API Rate Limits
 
-With authenticated requests, GitHub allows 5,000 requests per hour. Each collection run uses 6 API calls per repository, so:
+With authenticated requests, GitHub allows 5,000 requests per hour. Each collection run uses 5 API calls per repository, so:
 
 | Repos | Calls per Run | Runs per Hour (every 6h) | Hourly Usage |
 |-------|---------------|--------------------------|--------------|
-| 1     | 6             | ~0.17                    | ~1           |
-| 10    | 60            | ~0.17                    | ~10          |
-| 50    | 300           | ~0.17                    | ~50          |
-| 100   | 600           | ~0.17                    | ~100         |
+| 1     | 5             | ~0.17                    | ~1           |
+| 10    | 50            | ~0.17                    | ~8           |
+| 50    | 250           | ~0.17                    | ~42          |
+| 100   | 500           | ~0.17                    | ~83          |
 
 The collector logs a warning when the remaining rate limit drops below 100 requests and provides detailed error messages on rate limit exhaustion.
 

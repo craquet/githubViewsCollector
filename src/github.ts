@@ -21,13 +21,6 @@ export interface ReferrerEntry {
   uniques: number;
 }
 
-export interface PopularPathEntry {
-  path: string;
-  title: string;
-  count: number;
-  uniques: number;
-}
-
 // --- Collected data for a single repo ---
 
 export interface RepoTrafficData {
@@ -37,7 +30,6 @@ export interface RepoTrafficData {
   clonesDaily: TrafficResponse;
   clonesWeekly: TrafficResponse;
   referrers: ReferrerEntry[];
-  popularPaths: PopularPathEntry[];
 }
 
 // --- GitHub API client ---
@@ -107,25 +99,18 @@ export class GitHubClient {
     );
   }
 
-  async getPopularPaths(repo: RepoConfig): Promise<PopularPathEntry[]> {
-    return this.request<PopularPathEntry[]>(
-      `/repos/${repo.owner}/${repo.repo}/traffic/popular/paths`
-    );
-  }
-
   /**
    * Fetch all traffic data for a single repository.
-   * Makes 6 API calls: views (daily + weekly), clones (daily + weekly), referrers, popular paths.
+   * Makes 5 API calls: views (daily + weekly), clones (daily + weekly), referrers.
    */
   async collectRepo(repo: RepoConfig): Promise<RepoTrafficData> {
-    const [viewsDaily, viewsWeekly, clonesDaily, clonesWeekly, referrers, popularPaths] =
+    const [viewsDaily, viewsWeekly, clonesDaily, clonesWeekly, referrers] =
       await Promise.all([
         this.getViews(repo, "day"),
         this.getViews(repo, "week"),
         this.getClones(repo, "day"),
         this.getClones(repo, "week"),
         this.getReferrers(repo),
-        this.getPopularPaths(repo),
       ]);
 
     return {
@@ -135,7 +120,6 @@ export class GitHubClient {
       clonesDaily,
       clonesWeekly,
       referrers,
-      popularPaths,
     };
   }
 }

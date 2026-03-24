@@ -65,8 +65,7 @@ function updateGauges(allData: RepoTrafficData[]): void {
   metrics.clonesDailyUnique.reset();
   metrics.referrerViewsTotal.reset();
   metrics.referrerViewsUnique.reset();
-  metrics.popularPathViewsTotal.reset();
-  metrics.popularPathViewsUnique.reset();
+
 
   for (const data of allData) {
     const { owner, repo } = data.repo;
@@ -119,11 +118,7 @@ function updateGauges(allData: RepoTrafficData[]): void {
       metrics.referrerViewsUnique.set({ owner, repo, referrer: ref.referrer }, ref.uniques);
     }
 
-    // --- Popular paths ---
-    for (const p of data.popularPaths) {
-      metrics.popularPathViewsTotal.set({ owner, repo, path: p.path }, p.count);
-      metrics.popularPathViewsUnique.set({ owner, repo, path: p.path }, p.uniques);
-    }
+
   }
 }
 
@@ -151,7 +146,7 @@ export async function collect(config: Config): Promise<void> {
         `[collector] ${label}: ` +
           `views=${data.viewsWeekly.count} (${data.viewsWeekly.uniques} unique), ` +
           `clones=${data.clonesWeekly.count} (${data.clonesWeekly.uniques} unique), ` +
-          `${data.referrers.length} referrers, ${data.popularPaths.length} popular paths`
+          `${data.referrers.length} referrers`
       );
     } catch (err) {
       errorCount++;
