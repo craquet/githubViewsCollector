@@ -213,7 +213,7 @@ This gives you one data point per week (the full Mon-Sun unique count), building
 github_repo_views_daily_total{owner="my-org", repo="my-repo"}
 ```
 
-Use a table or time series panel with the `date` label for a 14-day breakdown.
+Each collection run emits the most recent day's views with a Prometheus timestamp (no `date` label). Over time Prometheus accumulates a day-by-day history as each collection run records the latest available day.
 
 ### Top Referrers Table
 

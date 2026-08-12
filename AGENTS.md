@@ -80,7 +80,7 @@ alongside the code that uses them -- there are no separate type-only files.
 | Constants         | camelCase    | `registry`, `viewsTotal`         |
 | Files             | lowercase    | `config.ts`, `collector.ts`      |
 | Prometheus names  | snake_case   | `github_repo_views_total`        |
-| Prometheus labels | lowercase    | `owner`, `repo`, `date`          |
+| Prometheus labels | lowercase    | `owner`, `repo`, `week`          |
 
 Prometheus metric naming pattern:
 - Repo metrics: `github_repo_<category>_[aggregation]_<type>` (e.g., `github_repo_views_weekly_unique`)
@@ -157,3 +157,14 @@ When adding new metrics:
   startup; invalid config terminates the process immediately
 - **Graceful shutdown**: SIGTERM/SIGINT handlers stop the cron job and metrics
   server before exiting
+
+## Documentation
+
+This repository has two documentation files: `README.md` (user-facing) and
+`AGENTS.md` (this file). Both must stay in sync with the code at all times.
+Whenever you change the code -- adding/removing metrics, config variables,
+endpoints, scripts, files, or altering documented behavior -- update both docs
+in the same change to reflect the new state. Do not let the documentation drift;
+stale docs are worse than no docs. The `README.md` metrics table, the AGENTS.md
+project structure and config sections, and any examples (PromQL, env, commands)
+are the most common places that need updates.
